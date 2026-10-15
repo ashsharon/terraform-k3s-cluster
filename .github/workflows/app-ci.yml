@@ -1,0 +1,55 @@
+name: App CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["app/**", ".github/workflows/app-ci.yml"]
+  pull_request:
+    paths: ["app/**", ".github/workflows/app-ci.yml"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+          cache-dependency-path: app/go.mod
+
+      - name: gofmt check
+        run: |
+          fmt_out="$(gofmt -l .)"
+          if [ -n "$fmt_out" ]; then
+            echo "Not gofmt'd: $fmt_out"
+            exit 1
+          fi
+
+      - run: go vet ./...
+      - run: go test ./... -race -cover
+      - run: go build -o bin/app .
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/build-push-action@v6
+        with:
+          context: app
+          push: false
+          tags: demo-app:ci
+
+  k8s-manifests-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: kubeconform (validate manifests against the K8s API schema)
+        run: |
+          docker run --rm -v "$PWD/k8s:/k8s" ghcr.io/yannh/kubeconform:latest \
+            -summary -strict /k8s
