@@ -18,18 +18,7 @@ jobs:
           terraform_version: "1.9.8"
 
       - name: terraform fmt (check only)
-        run: |
-          set +e
-          out=$(terraform fmt -check -recursive -diff 2>&1)
-          code=$?
-          set -e
-          if [ $code -ne 0 ]; then
-            esc="${out//'%'/'%25'}"
-            esc="${esc//$'\n'/'%0A'}"
-            esc="${esc//$'\r'/'%0D'}"
-            echo "::error::terraform fmt -check -recursive -diff output:%0A${esc}"
-            exit $code
-          fi
+        run: terraform fmt -check -recursive
 
       - name: terraform init (no backend, no real credentials needed)
         run: terraform init -backend=false

@@ -103,9 +103,9 @@ resource "hcloud_server" "agent" {
   }
 
   user_data = templatefile("${path.module}/cloud-init/agent.yaml.tftpl", {
-    k3s_token          = random_password.k3s_token.result
-    server_private_ip  = "10.0.1.10"
-    private_iface      = var.private_network_iface
+    k3s_token         = random_password.k3s_token.result
+    server_private_ip = "10.0.1.10"
+    private_iface     = var.private_network_iface
   })
 
   depends_on = [hcloud_server.server]
