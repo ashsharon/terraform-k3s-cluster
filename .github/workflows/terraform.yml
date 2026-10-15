@@ -21,19 +21,7 @@ jobs:
         run: terraform fmt -check -recursive
 
       - name: terraform init (no backend, no real credentials needed)
-        run: |
-          set +e
-          out=$(terraform init -backend=false 2>&1)
-          code=$?
-          set -e
-          echo "$out"
-          if [ $code -ne 0 ]; then
-            esc="${out//'%'/'%25'}"
-            esc="${esc//$'\n'/'%0A'}"
-            esc="${esc//$'\r'/'%0D'}"
-            echo "::error::terraform init output:%0A${esc}"
-            exit $code
-          fi
+        run: terraform init -backend=false
 
       - name: terraform validate
         run: terraform validate
