@@ -80,9 +80,9 @@ resource "hcloud_server" "server" {
   }
 
   user_data = templatefile("${path.module}/cloud-init/server.yaml.tftpl", {
-    k3s_token      = random_password.k3s_token.result
-    private_ip     = "10.0.1.10"
-    private_iface  = var.private_network_iface
+    k3s_token     = random_password.k3s_token.result
+    private_ip    = "10.0.1.10"
+    private_iface = var.private_network_iface
   })
 
   depends_on = [hcloud_network_subnet.private]
